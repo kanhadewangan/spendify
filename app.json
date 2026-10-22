@@ -1,41 +1,49 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "Spendify",
+    "slug": "spendify",
     "version": "1.0.0",
-
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "Spendify",
+      "themeColor": "#0A0A0F",
+      "backgroundColor": "#0A0A0F"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-
     "plugins": [
+      "expo-router",
+      "expo-sharing",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash.png",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#F5F5FA",
+          "dark": {
+            "backgroundColor": "#0A0A0F"
+          }
         }
       ]
     ],
-
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-
-    "userInterfaceStyle": "light",
-
-    "assetBundlePatterns": ["**/*"],
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "in.astroshrine.spendify"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
-    }
+      },
+      "package": "in.astroshrine.spendify"
+    },
+    "scheme": "spendify"
   }
 }
