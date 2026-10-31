@@ -13,6 +13,7 @@ import Animated, {
 
 import { TabIcon, type TabName } from './TabIcons';
 
+import { SpendBuddy } from '@/components/SpendBuddy';
 import { spring } from '@/lib/motion';
 import { useTheme } from '@/lib/ThemeProvider';
 import { size } from '@/lib/theme';
@@ -120,6 +121,9 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
     <View
       pointerEvents="box-none"
       style={[styles.dock, { paddingBottom: Math.max(insets.bottom - 6, 12) }]}>
+      <View pointerEvents="box-none" style={styles.buddy}>
+        <SpendBuddy />
+      </View>
       <View style={styles.shadow}>
         <Pill onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
           <View role="navigation" aria-label="Main" style={styles.row}>
@@ -161,6 +165,8 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   dock: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20 },
+  // The buddy perches on the capsule's top-right rim, clear of the active-tab disc.
+  buddy: { zIndex: 1, marginBottom: -PAD, paddingRight: 14 },
   shadow: {
     borderRadius: size.pill / 2,
     boxShadow: '0px 10px 30px rgba(0,0,0,0.28)',
