@@ -27,7 +27,8 @@
             "backgroundColor": "#0A0A0F"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -19,13 +19,17 @@ export interface Expense {
   amount: number;
   at: string;
   status: Status;
-  source: 'notification' | 'manual';
+  source: 'notification' | 'sms' | 'manual';
   sourceApp?: string;
   paymentMethod?: string;
   orderId?: string;
   items?: { name: string; qty: number; amount: number }[];
   vendor?: string;
   countInTotals: boolean;
+  // Set on entries created from a captured notification, so the same alert is never logged twice.
+  notificationKey?: string;
+  // Last local edit (ms). Seed data has none. Backup sync keeps the newest edit of each expense.
+  updatedAt?: number;
   // Letter-tile fill override (token name); defaults to the category colour.
   tile?: 'bg3' | 'red' | 'yellow';
 }
@@ -35,6 +39,8 @@ export type ThemeSetting = 'system' | 'dark' | 'light';
 export interface Settings {
   theme: ThemeSetting;
   notificationAccess: boolean;
+  // Mirrors Android's READ_SMS permission; per device, never synced.
+  smsAccess?: boolean;
   dailyLimit: number;
   mergeDuplicates: boolean;
   onboarded: boolean;

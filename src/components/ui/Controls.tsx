@@ -120,6 +120,11 @@ interface TextFieldCellProps {
   onChange: (value: string) => void;
   placeholder?: string;
   numeric?: boolean;
+  // Email keyboard, no autocaps; `code` adds one-time-code autofill to a numeric field.
+  email?: boolean;
+  code?: boolean;
+  // Masked entry; 'new' asks the password manager to suggest a strong password.
+  password?: 'current' | 'new';
   autoFocus?: boolean;
   last?: boolean;
 }
@@ -131,6 +136,9 @@ export function TextFieldCell({
   onChange,
   placeholder,
   numeric,
+  email,
+  code,
+  password,
   autoFocus,
   last,
 }: TextFieldCellProps) {
@@ -145,8 +153,33 @@ export function TextFieldCell({
         placeholderTextColor={c.label2}
         accessibilityLabel={label}
         autoFocus={autoFocus}
-        keyboardType={numeric ? 'number-pad' : 'default'}
-        inputMode={numeric ? 'numeric' : 'text'}
+        keyboardType={numeric ? 'number-pad' : email ? 'email-address' : 'default'}
+        inputMode={numeric ? 'numeric' : email ? 'email' : 'text'}
+        secureTextEntry={!!password}
+        autoCapitalize={email || password ? 'none' : undefined}
+        autoCorrect={email || password ? false : undefined}
+        autoComplete={
+          email
+            ? 'email'
+            : code
+              ? 'one-time-code'
+              : password === 'new'
+                ? 'new-password'
+                : password
+                  ? 'current-password'
+                  : undefined
+        }
+        textContentType={
+          email
+            ? 'emailAddress'
+            : code
+              ? 'oneTimeCode'
+              : password === 'new'
+                ? 'newPassword'
+                : password
+                  ? 'password'
+                  : undefined
+        }
         keyboardAppearance={scheme}
         selectionColor={c.tint}
         textAlign="right"

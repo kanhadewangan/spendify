@@ -12,8 +12,8 @@ web-build/
 
 
 
-ios
-android
+/ios
+/android
 
 # macOS
 .DS_Store
@@ -25,3 +25,11 @@ android
 .devin
 
 
+
+# Local env (Supabase keys)
+.env
+.env.local
+
+# Gradle output of local native modules
+modules/*/android/build/
+modules/*/android/.gradle/

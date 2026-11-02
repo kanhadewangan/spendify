@@ -100,15 +100,23 @@ export default function ExpenseDetail() {
           header="Payment"
           footer={
             e.source === 'notification'
-              ? 'Amounts are read on-device from the app’s notification. Nothing leaves your phone.'
-              : undefined
+              ? 'Amounts are read on-device. The notification itself never leaves your phone.'
+              : e.source === 'sms'
+                ? 'Read on-device from a bank SMS. The message itself never leaves your phone.'
+                : undefined
           }>
           <Cell key="method" title="Method" value={e.paymentMethod ?? '—'} />
           {e.orderId && <Cell key="order" title="Order ID" value={e.orderId} />}
           <Cell
             key="source"
             title="Detected from"
-            value={e.source === 'notification' ? `${e.sourceApp} notification` : 'Added manually'}
+            value={
+              e.source === 'notification'
+                ? `${e.sourceApp} notification`
+                : e.source === 'sms'
+                  ? `SMS from ${e.sourceApp}`
+                  : 'Added manually'
+            }
           />
         </InsetGroup>
 
