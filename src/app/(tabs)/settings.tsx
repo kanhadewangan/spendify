@@ -2,16 +2,19 @@ import {
   BellRing,
   ChevronRight,
   CircleQuestionMark,
+  CloudUpload,
+  FlaskConical,
   Gauge,
   LayoutGrid,
   Merge,
+  MessageSquareText,
   Share,
   ShieldCheck,
   SunMoon,
   type LucideIcon,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Linking, Platform, StyleSheet, View } from 'react-native';
 
 import {
   Alert,
@@ -28,8 +31,12 @@ import { exportCSV } from '@/lib/csv';
 import { formatINR } from '@/lib/format';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/ThemeProvider';
+import { useSession } from '@/lib/useBackup';
+import { simulateBankSms } from '@/lib/useNotificationIngest';
 import { radius, size, type ColorToken } from '@/lib/theme';
 import { CATEGORIES, type ThemeSetting } from '@/lib/types';
+
+import * as Notifications from '../../../modules/spendify-notifications';
 
 const tile = (Icon: LucideIcon, color: ColorToken) => (
   <SymbolTile color={color} icon={(fg, px) => <Icon size={px} strokeWidth={2.25} color={fg} />} />
@@ -60,6 +67,29 @@ export default function Settings() {
     setSheetOpen(true);
   };
   const device = Platform.OS === 'ios' ? 'iPhone' : 'device';
+  const session = useSession();
+
+  // Bank SMS: ask for READ_SMS. Android only lets the user revoke it in system settings.
+  const openAppSettings = { label: 'Open Settings', onPress: () => Linking.openSettings() };
+  const toggleSms = async () => {
+    if (settings.smsAccess) {
+      return setSheet({
+        title: 'SMS Access',
+        message:
+          'Spendify reads bank SMS that mention a rupee amount, on this phone only. To stop, remove the SMS permission in Android settings.',
+        actions: [openAppSettings, { label: 'Cancel', role: 'cancel' }],
+      });
+    }
+    const granted = await Notifications.requestSmsAccess();
+    updateSettings({ smsAccess: granted });
+    if (!granted) {
+      setSheet({
+        title: 'SMS Access Is Off',
+        message: 'To log spends from bank SMS, allow SMS in Android settings → Permissions.',
+        actions: [openAppSettings, { label: 'Not Now', role: 'cancel' }],
+      });
+    }
+  };
 
   return (
     <LargeTitleScreen title="Settings">
@@ -102,8 +132,32 @@ export default function Settings() {
           title="Notification Access"
           value={settings.notificationAccess ? 'On' : 'Off'}
           chevron
-          href="/onboarding"
+          // Android grants this in system settings; elsewhere it stays the onboarding prompt.
+          {...(Notifications.isSupported
+            ? { onPress: Notifications.openAccessSettings }
+            : { href: '/onboarding' as const })}
         />
+        {Notifications.isSupported && (
+          <Cell
+            key="sms"
+            leading={tile(MessageSquareText, 'tint')}
+            leadingSize={size.icon}
+            title="SMS Access"
+            value={settings.smsAccess ? 'On' : 'Off'}
+            chevron
+            onPress={toggleSms}
+          />
+        )}
+        {__DEV__ && (
+          <Cell
+            key="simulate-sms"
+            leading={tile(FlaskConical, 'gray')}
+            leadingSize={size.icon}
+            title="Simulate Bank SMS (dev)"
+            titleColor="tint"
+            onPress={simulateBankSms}
+          />
+        )}
         <Cell
           key="limits"
           leading={tile(Gauge, 'orange')}
@@ -171,6 +225,15 @@ export default function Settings() {
           }
         />
         <Cell
+          key="backup"
+          leading={tile(CloudUpload, 'blue')}
+          leadingSize={size.icon}
+          title="Backup & Sync"
+          value={session ? 'On' : 'Off'}
+          chevron
+          href="/backup"
+        />
+        <Cell
           key="export"
           leading={tile(Share, 'gray')}
           leadingSize={size.icon}
@@ -200,11 +263,11 @@ export default function Settings() {
         {tile(ShieldCheck, 'tint')}
         <View style={styles.privacyText}>
           <Text variant="subheadline" weight="600">
-            Your data stays on this {device}
+            {session ? 'Your backup is private to you' : `Your data stays on this ${device}`}
           </Text>
           <Text variant="footnote" color="label2">
-            Notifications are read and parsed on-device. There’s no account, no server and no
-            tracking — export or delete your data at any time.
+            Notifications are read and parsed on-device and never uploaded. Backup is optional and
+            stores only your expenses. No tracking — export or delete your data at any time.
           </Text>
         </View>
       </View>

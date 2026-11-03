@@ -17,6 +17,8 @@ import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/ThemeProvider';
 import { size } from '@/lib/theme';
 
+import * as Notifications from '../../modules/spendify-notifications';
+
 const FEATURES: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: BellRing,
@@ -26,7 +28,7 @@ const FEATURES: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: Cpu,
     title: 'Processed on your device',
-    body: 'Notifications are parsed locally. Nothing is uploaded, and there is no account.',
+    body: 'Notifications are parsed locally and never uploaded. No account needed — backup is optional.',
   },
   {
     icon: ChartNoAxesColumn,
@@ -44,7 +46,13 @@ export default function Onboarding() {
   const [asking, setAsking] = useState(false);
 
   const finish = (allow: boolean) => {
-    updateSettings({ notificationAccess: allow, onboarded: true });
+    if (Notifications.isSupported) {
+      // The real grant happens in Android settings; the switch syncs when the app comes back.
+      updateSettings({ notificationAccess: Notifications.hasAccess(), onboarded: true });
+      if (allow) Notifications.openAccessSettings();
+    } else {
+      updateSettings({ notificationAccess: allow, onboarded: true });
+    }
     router.replace('/home');
   };
 

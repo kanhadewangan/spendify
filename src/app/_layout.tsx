@@ -6,11 +6,16 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 
 import { ThemeProvider, useTheme } from '@/lib/ThemeProvider';
+import { useAutoSync } from '@/lib/useBackup';
+import { useNotificationAccessSync, useNotificationIngest } from '@/lib/useNotificationIngest';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { c } = useTheme();
+  useNotificationAccessSync();
+  useNotificationIngest();
+  useAutoSync();
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
       <Stack.Screen name="index" options={{ animation: 'none' }} />
@@ -18,6 +23,7 @@ function RootStack() {
       <Stack.Screen name="(tabs)" options={{ animation: 'fade', animationDuration: 350 }} />
       {/* Push to Detail: the native iOS push (incoming slides in over a dimmed, shifted page). */}
       <Stack.Screen name="expenses/[id]" options={{ animation: 'default' }} />
+      <Stack.Screen name="backup" options={{ animation: 'default' }} />
       <Stack.Screen
         name="expense-form"
         options={{
